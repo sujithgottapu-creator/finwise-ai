@@ -1,0 +1,50 @@
+services:
+  # Backend API Gateway
+  - type: web
+    name: finwise-ai-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://finwise-ai-pearl.vercel.app
+      - key: APP_ENV
+        value: production
+      # Email delivery for sign-up and password-reset codes. Set ONE provider in the Render dashboard.
+      # Brevo (free, 300 emails/day, works on Render free tier): BREVO_API_KEY + SMTP_FROM_EMAIL
+      - key: BREVO_API_KEY
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      # Extra allowed website origins (comma separated), e.g. your Vercel / custom domain
+      - key: EXTRA_CORS_ORIGINS
+        sync: false
+      # Optional: creates an admin account with YOUR private password (never commit it)
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false
+
+  # Permanent Production Frontend Web Application
+  - type: web
+    name: finwise-ai-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NEXT_PUBLIC_API_URL
+        value: https://finwise-ai-93mc.onrender.com
+      - key: NEXT_PUBLIC_CLERK_SIGN_IN_URL
+        value: /sign-in
+      - key: NEXT_PUBLIC_CLERK_SIGN_UP_URL
+        value: /sign-up
+      - key: NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
+        value: /dashboard
+      - key: NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
+        value: /onboarding
